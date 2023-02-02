@@ -7,6 +7,7 @@ import java.util.*;
 import com.product.crud.DTO.UserDTO;
 import com.product.crud.Exception.DataNotFoundExeception;
 import com.product.crud.Exception.UserAuthorizationException;
+import com.product.crud.errors.RegistrationStatus;
 import com.product.crud.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -19,6 +20,8 @@ import org.springframework.stereotype.Service;
 
 import com.product.crud.repo.CrudRepo;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 //import edu.neu.coe.csye6225.webapp.exeception.DataNotFoundExeception;
 
 
@@ -119,4 +122,21 @@ public class CrudService implements UserDetailsService {
 		return new org.springframework.security.core.userdetails.User(
 				user.getUsername(), user.getPassword(),Collections.emptyList());
 	}
+
+	public Boolean isEmailPresent(String username) {
+		return repo.isEmailPresent(username) > 0 ? true : false;
+	}
+
+	public RegistrationStatus getRegistrationStatus(BindingResult errors) {
+		FieldError usernameError = errors.getFieldError("username");
+		FieldError passwordError = errors.getFieldError("password");
+		FieldError firstnameError = errors.getFieldError("firstName");
+		FieldError lastnameError = errors.getFieldError("lastName");
+		String firstnameErrorMessage = firstnameError == null ? "-" : firstnameError.getCode();
+		String lastnameErrorMessage = lastnameError == null ? "-" : lastnameError.getCode();
+		String usernameErrorMessage = usernameError == null ? "-" : usernameError.getCode();
+		String passwordErrorMessage = passwordError == null ? "-" : passwordError.getCode();
+		return new RegistrationStatus(usernameErrorMessage, passwordErrorMessage,firstnameErrorMessage,lastnameErrorMessage);
+	}
+
 }
