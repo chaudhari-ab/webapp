@@ -42,8 +42,8 @@ class DemoApplicationTests {
         user.setPassword("Password");
         user.setAccount_created(LocalDateTime.now());
         user.setAccount_updated(LocalDateTime.now());
-        user.setUsername("Anurag.com");
-        String username = "Anurag.com";
+        user.setUsername("Abhishek");
+        String username = "Abhishek";
         when(repository.findByUsername(username)).thenReturn(user);
         assertEquals(user.getUsername(), "Abhishek"); 
     }
