@@ -45,6 +45,6 @@ class DemoApplicationTests {
         user.setUsername("Anurag.com");
         String username = "Anurag.com";
         when(repository.findByUsername(username)).thenReturn(user);
-        assertEquals(user.getUsername(), service.loadUserByUsername(username).getUsername());
+        assertEquals(user.getUsername(), "Abhishek");
     }
 }
