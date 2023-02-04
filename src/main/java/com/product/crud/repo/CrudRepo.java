@@ -20,4 +20,7 @@ public interface CrudRepo extends JpaRepository<User, UUID>{
     @Query("SELECT count(username) FROM User WHERE username=:username")
     int isEmailPresent(@Param("username") String username);
 
+    @Query("SELECT User FROM User WHERE username=:username")
+    User getUserByUserName(@Param("username") String username);
+
 }
