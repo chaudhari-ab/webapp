@@ -33,7 +33,6 @@ public class CrudService implements UserDetailsService {
 	private static List<User> users = new ArrayList<>();
 	@Autowired
 	private CrudRepo repo;
-
 	private PasswordEncoder passwordEncoder;
 
 
@@ -56,14 +55,12 @@ public class CrudService implements UserDetailsService {
 		userdto.setLast_name(savedUser.getLast_name());
 		userdto.setAccount_created(savedUser.getAccount_created());
 		userdto.setAccount_updated(savedUser.getAccount_updated());
-
 		return userdto;
 	}
 
 	private String encodePassword(String password) {
 		this.passwordEncoder = new BCryptPasswordEncoder();
 		String enCodedPassword = this.passwordEncoder.encode(password);
-		//this.passwordEncoder = null;
 		return enCodedPassword;
 	}
 
@@ -75,22 +72,19 @@ public class CrudService implements UserDetailsService {
 
 	public boolean updateUser(User user, UUID userId) {
 		user.setPassword(encodePassword(user.getPassword()));
-//		if(fetchUserbyId(user.getId())!=null){
-		System.out.println("Abhiishek");
+		System.out.println("Abhishek");
 		repo.setUserInfoById(user.getFirst_name(),user.getLast_name(), user.getPassword() ,LocalDateTime.now() ,userId);
 		return true;
-//		}else{
-//			return false;
-//		}
+
 	}
 	
-
 
 	public Optional<User> fetchUserbyId(UUID id){
 		return repo.findById(id);
 	}
-	public Optional<User> fetchProductbyEmail(String emailId) {
-		return null;
+	public User fetchUserByUserName(String userName)throws DataNotFoundExeception {
+		User user = repo.findByUsername(userName);
+		return user;
 	}
 
 	public User getUserDetailsAuth(UUID id) throws DataNotFoundExeception {
@@ -142,4 +136,6 @@ public class CrudService implements UserDetailsService {
 		return new RegistrationStatus(usernameErrorMessage, passwordErrorMessage,firstnameErrorMessage,lastnameErrorMessage);
 	}
 
+	public void isUserVerified() {
+	}
 }
