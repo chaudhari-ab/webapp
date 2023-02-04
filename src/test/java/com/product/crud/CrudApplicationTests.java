@@ -39,7 +39,7 @@ class CrudApplicationTests {
         user.setAccount_created(LocalDateTime.now());
         user.setAccount_updated(LocalDateTime.now());
         user.setUsername("edsdsd");
-        String username = "Abhishek";
+        String username = ""
         when(repository.findByUsername(username)).thenReturn(user);
         assertEquals(user.getUsername(), service.loadUserByUsername(username).getUsername());
     }
