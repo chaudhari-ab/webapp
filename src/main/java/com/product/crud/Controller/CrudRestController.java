@@ -58,6 +58,16 @@ public class CrudRestController {
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid Password Format");
 			}
 
+			if(user.getId()!=null){
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Cannot Enter Id");
+			}
+			if(user.getAccount_created()!=null){
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Cannot Enter Account Created");
+			}
+			if(user.getAccount_updated()!=null){
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Cannot Enter Account Updated");
+			}
+
 			fromDBuser = service.fetchUserByUserName(user.getUsername());
 			if(fromDBuser==null){
 				return ResponseEntity.status(HttpStatus.CREATED).body(service.saveUser(user));
@@ -72,7 +82,7 @@ public class CrudRestController {
 	}
 
 	@RequestMapping(path = "/v1/user/{userId}", method = RequestMethod.PUT)
-	public ResponseEntity<?> updateUser(@PathVariable UUID userId ,  @RequestBody User user,BindingResult errors, HttpServletRequest request ) {
+	public ResponseEntity<?> updateUser(@PathVariable Long userId ,  @RequestBody User user,BindingResult errors, HttpServletRequest request ) {
 		RegistrationStatus registrationStatus;
 		if(user==null) return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Request Body Cannot be Empty");
 		try {
@@ -88,6 +98,15 @@ public class CrudRestController {
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid Password Format");
 			}
 
+			if(user.getId()!=null){
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Cannot Enter Id");
+			}
+			if(user.getAccount_created()!=null){
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Cannot Enter Account Created");
+			}
+			if(user.getAccount_updated()!=null){
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Cannot Enter Account Updated");
+			}
 			service.isAuthorised(userId,request.getHeader("Authorization").split(" ")[1]);
 			service.updateUser(user,userId);
 			return ResponseEntity.status(HttpStatus.CREATED).body("User Updated");
@@ -105,7 +124,7 @@ public class CrudRestController {
 	}
 
 	@RequestMapping(path = "/v1/user/{userId}", method = RequestMethod.GET)
-	public ResponseEntity<?> fetchProductByID(@PathVariable UUID userId, HttpServletRequest request) {
+	public ResponseEntity<?> fetchProductByID(@PathVariable Long userId, HttpServletRequest request) {
 		try {
 			if(userId.toString().isBlank()||userId.toString().isEmpty()) {
 				throw new InvalidInputException("Enter Valid User Id");
@@ -129,35 +148,10 @@ public class CrudRestController {
 		}
 	}
 
-	@RequestMapping(path = "/v1/product", method = RequestMethod.POST)
-	public ResponseEntity<?> createProduct(@Valid @RequestBody Product product,  HttpServletRequest request) {
 
-		System.out.println("Inside /v1/product");
-		try {
-
-
-			byte[] token = Base64.getDecoder().decode(request.getHeader("Authorization").split(" ")[1]);
-			String decodedStr = new String(token, StandardCharsets.UTF_8);
-			String userName = decodedStr.split(":")[0];
-
-			User user = service.fetchUserByUserName(userName);
-
-			service.isAuthorised(user.getId(),request.getHeader("Authorization").split(" ")[1]);
-
-			System.out.println("User is Verified - By Abhishek");
-			return new ResponseEntity<String>( "User is Verified",HttpStatus.OK);
-
-		} catch (DataNotFoundExeception e) {
-			// TODO Auto-generated catch block
-			return new ResponseEntity<String>( "User Not Found",HttpStatus.BAD_REQUEST);
-		}
-		catch (Exception e) {
-			// TODO Auto-generated catch block
-			return new ResponseEntity<String>( e.getMessage(),HttpStatus.BAD_REQUEST);
-		}
-	}
 
 	@RequestMapping(path = "/healthz", method = RequestMethod.GET)
-	public void healthZ() {
+	public void healthZ(HttpServletRequest request) {
+//		System.out.println(request.getHeader("Authorization"));
 	}
 }

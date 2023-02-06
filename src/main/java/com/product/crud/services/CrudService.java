@@ -70,7 +70,7 @@ public class CrudService implements UserDetailsService {
 		return enCodedPassword;
 	}
 
-	public boolean updateUser(User user, UUID userId) {
+	public boolean updateUser(User user, Long userId) {
 		user.setPassword(encodePassword(user.getPassword()));
 		System.out.println("Abhishek");
 		repo.setUserInfoById(user.getFirst_name(),user.getLast_name(), user.getPassword() ,LocalDateTime.now() ,userId);
@@ -79,7 +79,7 @@ public class CrudService implements UserDetailsService {
 	}
 	
 
-	public Optional<User> fetchUserbyId(UUID id){
+	public Optional<User> fetchUserbyId(Long id){
 		return repo.findById(id);
 	}
 	public User fetchUserByUserName(String userName)throws DataNotFoundExeception {
@@ -87,7 +87,7 @@ public class CrudService implements UserDetailsService {
 		return user;
 	}
 
-	public User getUserDetailsAuth(UUID id) throws DataNotFoundExeception {
+	public User getUserDetailsAuth(Long id) throws DataNotFoundExeception {
 		Optional<User> user = repo.findById(id);
 		if (user.isPresent()) {
 			return user.get();
@@ -95,7 +95,7 @@ public class CrudService implements UserDetailsService {
 		throw new DataNotFoundExeception("User Not Found");
 	}
 
-	public boolean isAuthorised(UUID userId,String tokenEnc) throws DataNotFoundExeception, UserAuthorizationException {
+	public boolean isAuthorised(Long userId,String tokenEnc) throws DataNotFoundExeception, UserAuthorizationException {
 
 		this.passwordEncoder = new BCryptPasswordEncoder();
 		User user=getUserDetailsAuth(userId);

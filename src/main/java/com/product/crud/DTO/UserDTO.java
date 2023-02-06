@@ -8,7 +8,7 @@ public class UserDTO {
     public UserDTO(){
 
     }
-    private UUID id;
+    private Long id;
     private String username;
 
     private String first_name;
@@ -16,11 +16,11 @@ public class UserDTO {
     private LocalDateTime account_created;
     private LocalDateTime account_updated;
 
-    public UUID getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(UUID id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
