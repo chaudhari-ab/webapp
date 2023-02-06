@@ -1,17 +1,25 @@
 package com.product.crud.model;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+
 import java.time.LocalDateTime;
 import java.util.UUID;
-
+@Entity
 public class Product {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Integer id;
     private String name;
     private String description;
     private String sku;
     private String manufacturer;
     private LocalDateTime date_added;
     private LocalDateTime date_last_updated;
-    private Integer qtantity;
+    private Integer quantity;
     private UUID owner_user_id;
 
 
@@ -64,12 +72,12 @@ public class Product {
         this.date_last_updated = date_last_updated;
     }
 
-    public Integer getQtantity() {
-        return qtantity;
+    public Integer getQuantity() {
+        return quantity;
     }
 
-    public void setQtantity(Integer qtantity) {
-        this.qtantity = qtantity;
+    public void setQuantity(Integer quantity) {
+        this.quantity = quantity;
     }
 
     public UUID getOwner_user_id() {

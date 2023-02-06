@@ -21,15 +21,12 @@ public class User {
     }
 
     @Id
-    @GeneratedValue(generator = "UUID")
-    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
-    @JdbcTypeCode(SqlTypes.CHAR)
-
-    private UUID id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
     @Column(name ="Username")
     private String username;
 
-//    @JsonIgnore
+
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
     @Column(name ="First Name")
@@ -74,11 +71,11 @@ public class User {
 
 
 
-    public UUID getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(UUID id) {
+    public void setId(Long id) {
         this.id = id;
     }
     public String getUsername() {
