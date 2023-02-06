@@ -32,7 +32,7 @@ class CrudApplicationTests {
     @Test
     public void saveUserTest() {
         User user = new User();
-        //UUID.randomUUID(),"kk", "K", "a1100@dddfgii.com", "sdsdssscdD@2", LocalDateTime.now(), LocalDateTime.now()
+
         user.setId(new Random().nextLong());
         user.setFirst_name("Abhishek");
         user.setLast_name("Chaudhari");
