@@ -14,6 +14,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.time.LocalDateTime;
+import java.util.Random;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -32,7 +33,7 @@ class CrudApplicationTests {
     public void saveUserTest() {
         User user = new User();
         //UUID.randomUUID(),"kk", "K", "a1100@dddfgii.com", "sdsdssscdD@2", LocalDateTime.now(), LocalDateTime.now()
-        user.setId(UUID.randomUUID());
+        user.setId(new Random().nextLong());
         user.setFirst_name("Abhishek");
         user.setLast_name("Chaudhari");
         user.setPassword("Password");
