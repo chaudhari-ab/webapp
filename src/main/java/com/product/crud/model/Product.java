@@ -1,9 +1,6 @@
 package com.product.crud.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -15,12 +12,13 @@ public class Product {
     private Integer id;
     private String name;
     private String description;
+    @Column(unique = true)
     private String sku;
     private String manufacturer;
     private LocalDateTime date_added;
     private LocalDateTime date_last_updated;
-    private Integer quantity;
-    private UUID owner_user_id;
+    private int quantity;
+    private Long owner_user_id;
 
 
 
@@ -72,19 +70,19 @@ public class Product {
         this.date_last_updated = date_last_updated;
     }
 
-    public Integer getQuantity() {
+    public int getQuantity() {
         return quantity;
     }
 
-    public void setQuantity(Integer quantity) {
+    public void setQuantity(int quantity) {
         this.quantity = quantity;
     }
 
-    public UUID getOwner_user_id() {
+    public Long getOwner_user_id() {
         return owner_user_id;
     }
 
-    public void setOwner_user_id(UUID owner_user_id) {
+    public void setOwner_user_id(Long owner_user_id) {
         this.owner_user_id = owner_user_id;
     }
 }
