@@ -1,12 +1,16 @@
 package com.product.crud.Controller;
 
 import com.google.gson.Gson;
+import com.product.crud.Exception.InvalidInputException;
+import com.product.crud.Exception.UserAuthorizationException;
 import com.product.crud.model.Product;
 import com.product.crud.model.ResponseObject;
 import com.product.crud.model.User;
 import com.product.crud.services.CrudService;
 import com.product.crud.services.ProductService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponseWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -31,86 +35,63 @@ public class ProductController {
     @ResponseBody
     public ResponseEntity<?> createProduct( @RequestBody Product product, HttpServletRequest request) {
         System.out.println("Inside /v1/product");
-        responseObject = new ResponseObject();
+//        HttpServletResponse response = new HttpServletResponseWrapper();
         try {
-
-            responseHashmap = new HashMap<>();
             Long userId = productService.authCredential(request.getHeader("Authorization").split(" ")[1]);
             if(userId == null){
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid Username or Password");
-//                responseObject.setHttpStatusCode(HttpStatus.UNAUTHORIZED);
-//                responseObject.setResponseMessage("Invalid Username or Password");
-//                return responseObject;
-//                responseHashmap.put("HttpStatusMessage",""+HttpStatus.UNAUTHORIZED.value());
-//                responseHashmap.put("HttpStatusMessage",HttpStatus.UNAUTHORIZED.toString());
-//                responseHashmap.put("response Message","Invalid Username or Password");
-//                return responseHashmap;
+                //return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid Username or Password");
+                throw new UserAuthorizationException("Invalid Username or Password");
             }
             product.setOwner_user_id(userId);
-            if (product == null || request==null) {
-                return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Request Body Cannot be Empty");
-//                responseHashmap.put("HttpStatusMessage",""+HttpStatus.NO_CONTENT.value());
-//                responseHashmap.put("HttpStatusMessage",HttpStatus.NO_CONTENT.toString());
-//                responseHashmap.put("response Message","Request Body Cannot be Empty");
-//                return responseHashmap;
+            if (product == null || request == null) {
+//                return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Request Body Cannot be Empty");
+                throw new InvalidInputException("Request Body Cannot be Empty");
+
             }
 
             if (product.getName().isBlank() || product.getName().isEmpty()) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Product Name Cannot be Empty");
-//                responseObject.setHttpStatusCode(HttpStatus.BAD_REQUEST);
-//                responseObject.setResponseMessage("Product Name Cannot be Empty");
-//                return null;
+//                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Product Name Cannot be Empty");
+                throw new Exception("Product Name Cannot be Empty");
+
             }
             if (product.getDescription().isBlank() || product.getDescription().isEmpty()) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Product Description Cannot be Empty");
-//                responseObject.setHttpStatusCode(HttpStatus.BAD_REQUEST);
-//                responseObject.setResponseMessage("Product Description Cannot be Empty");
-////                return responseObject;
+//                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Product Description Cannot be Empty");
+                throw new Exception("Product Description Cannot be Empty");
+
             }
             if (product.getSku().isBlank() || product.getSku().isEmpty()) {
-                return new ResponseEntity("Product SKU Cannot be Empty",HttpStatus.BAD_REQUEST);
-//                responseObject.setHttpStatusCode(HttpStatus.BAD_REQUEST);
-//                responseObject.setResponseMessage("Product SKU Cannot be Empty");
-////                return responseObject;
+//                return new ResponseEntity("Product SKU Cannot be Empty",HttpStatus.BAD_REQUEST);
+                throw new Exception("Product SKU Cannot be Empty");
+
             }
             if(productService.ifProductSKUExists(product.getSku())) {
-//                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Product with SKU Exists");
-                return new ResponseEntity<String>( new Gson().toJson("Product with SKU Exists"),HttpStatus.BAD_REQUEST);
-//                responseHashmap.put("HttpStatusMessage",""+HttpStatus.BAD_REQUEST.value());
-//                responseHashmap.put("HttpStatusMessage",HttpStatus.BAD_REQUEST.toString());
-//                responseHashmap.put("response Message","Product with SKU Exists");
-//                return responseHashmap;
+//                return new ResponseEntity<String>( new Gson().toJson("Product with SKU Exists"),HttpStatus.BAD_REQUEST);
+                throw new Exception("Product with SKU Exists");
             }
             if (product.getManufacturer().isBlank() || product.getManufacturer().isEmpty()) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Product Manufacturer Cannot be Empty");
-//                responseObject.setHttpStatusCode(HttpStatus.BAD_REQUEST);
-//                responseObject.setResponseMessage("Product Manufacturer Cannot be Empty");
-////                return responseObject;
+                throw new Exception("Manufacturer Cannot be Null");
             }
                 try {
                     if ( product.getQuantity() < 1) {
-                        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid Product Quantity ");
-//                        responseObject.setHttpStatusCode(HttpStatus.BAD_REQUEST);
-//                        responseObject.setResponseMessage("Invalid Product Quantity");
-////                        return responseObject;
+//                        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid Product Quantity ");
+                        throw new Exception("Invalid Product Quantity");
                     }
                 }catch(Exception e){
-                    return new ResponseEntity(e.getMessage(),HttpStatus.BAD_REQUEST);
-//                    responseObject.setHttpStatusCode(HttpStatus.BAD_REQUEST);
-//                    responseObject.setResponseMessage(e.getMessage());
-////                    return responseObject;
+//                    return new ResponseEntity(e.getMessage(),HttpStatus.BAD_REQUEST);
+                    throw new Exception("Invalid Product Quantity");
+
                 }
             return new ResponseEntity<Product>( productService.addProduct(product),HttpStatus.CREATED);
-//            responseHashmap.put("HttpStatusMessage",""+HttpStatus.CREATED.value());
-//            responseHashmap.put("HttpStatusMessage",productService.addProduct(product).toString());
-//            responseHashmap.put("response Message","Product Added");
-//            return responseHashmap;
+
         }
-        catch (Exception e) {
+        catch(UserAuthorizationException e){
+            return new ResponseEntity<String>( e.getMessage(),HttpStatus.UNAUTHORIZED);
+        }
+        catch(InvalidInputException e){
+            return new ResponseEntity<String>( e.getMessage(),HttpStatus.NO_CONTENT);
+        }
+        catch(Exception e) {
             return new ResponseEntity<String>( e.getMessage(),HttpStatus.BAD_REQUEST);
-//            responseObject.setHttpStatusCode(HttpStatus.BAD_REQUEST);
-//            responseObject.setResponseMessage(e.getMessage());
-//            return null;
         }
     }
 
@@ -134,9 +115,7 @@ public class ProductController {
             if (product.getSku().isBlank() || product.getSku().isEmpty()) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Product SKU Cannot be Empty");
             }
-//            if(productService.ifProductSKUExists(product.getSku())) {
-//                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Product with SKU Exists");
-//            }
+
             if (product.getManufacturer().isBlank() || product.getManufacturer().isEmpty()) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Product Manufacturer Cannot be Empty");
             }

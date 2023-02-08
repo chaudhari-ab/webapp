@@ -26,6 +26,8 @@ public class ProductService {
 
         product.setDate_added(LocalDateTime.now());
         product.setDate_last_updated(LocalDateTime.now());
+        int qt = product.getQuantity();
+        System.out.println("quantity " + qt);
         return productRepo.save(product);
     }
 
