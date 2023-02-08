@@ -25,9 +25,6 @@ import java.util.UUID;
 @RestController
 public class CrudRestController {
 
-
-
-
 	@Autowired
 	private CrudService service;
 
@@ -132,15 +129,12 @@ public class CrudRestController {
 			service.isAuthorised(userId,request.getHeader("Authorization").split(" ")[1]);
 			return ResponseEntity.status(HttpStatus.OK).body(service.fetchUserbyId(userId));
 		} catch (InvalidInputException e) {
-			// TODO Auto-generated catch block
 			return new ResponseEntity<String>( e.getMessage(),HttpStatus.BAD_REQUEST);
 		}
 		catch (UserAuthorizationException e) {
-			// TODO Auto-generated catch block
 			return new ResponseEntity<String>( e.getMessage(),HttpStatus.FORBIDDEN);
 		}
 		catch (DataNotFoundExeception e) {
-			// TODO Auto-generated catch block
 			return new ResponseEntity<String>( e.getMessage(),HttpStatus.NOT_FOUND);
 		}
 		catch(Exception e) {
@@ -148,10 +142,7 @@ public class CrudRestController {
 		}
 	}
 
-
-
 	@RequestMapping(path = "/healthz", method = RequestMethod.GET)
 	public void healthZ(HttpServletRequest request) {
-//		System.out.println(request.getHeader("Authorization"));
 	}
 }
