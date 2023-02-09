@@ -116,4 +116,40 @@ public class ProductService {
         return true;
     }
 
+    public Product getProductbyId(Integer productId){
+        Product productFromDb = productRepo.getProductbyId(productId);
+        return productFromDb;
+    }
+    public String updateProductwithPatch(Integer productId, Product product) {
+
+        Product productFromDb = productRepo.getProductbyId(productId);
+        if(productFromDb!=null){
+        if(product.getQuantity()!=null){
+            if(product.getQuantity()<1) return "Invalid Product Quantity";
+            productFromDb.setQuantity(product.getQuantity());
+        }
+        if(product.getName()!=null){
+            if(product.getName().isBlank()) return "Invalid Product Name";
+            productFromDb.setName(product.getName());
+        }
+        if(product.getManufacturer()!=null){
+            if(product.getManufacturer().isBlank()) return "Invalid Product Manufacturer";
+            productFromDb.setManufacturer(product.getManufacturer());
+        }
+        if(product.getDescription()!=null){
+            if(product.getDescription().isBlank()) return "Invalid Product Description";
+            productFromDb.setDescription(product.getDescription());
+        }
+        if(product.getSku()!=null){
+            if(ifProductSKUExists(product.getSku())){
+                return "Product with SKU Exists";
+            }
+            productFromDb.setSku(product.getSku());
+        }
+        productRepo.save(productFromDb);
+        return "Product Updated";
+        }else{
+            return "Product with the ID does not Exists";
+        }
+    }
 }

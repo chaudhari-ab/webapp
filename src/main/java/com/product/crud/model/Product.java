@@ -10,6 +10,15 @@ public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer id;
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
     private String name;
     private String description;
     @Column(unique = true)
@@ -17,7 +26,7 @@ public class Product {
     private String manufacturer;
     private LocalDateTime date_added;
     private LocalDateTime date_last_updated;
-    private int quantity;
+    private Integer quantity;
     private Long owner_user_id;
 
 
@@ -70,11 +79,11 @@ public class Product {
         this.date_last_updated = date_last_updated;
     }
 
-    public int getQuantity() {
+    public Integer getQuantity() {
         return quantity;
     }
 
-    public void setQuantity(int quantity) {
+    public void setQuantity(Integer quantity) {
         this.quantity = quantity;
     }
 
