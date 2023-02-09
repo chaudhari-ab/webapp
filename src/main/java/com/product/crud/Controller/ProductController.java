@@ -37,15 +37,17 @@ public class ProductController {
     @ResponseBody
     public ResponseEntity<?> createProduct( @RequestBody Product product, HttpServletRequest request) {
         System.out.println("Inside /v1/product");
-
+//        HttpServletResponse response = new HttpServletResponseWrapper();
         try {
             Long userId = productService.authCredential(request.getHeader("Authorization").split(" ")[1]);
             if(userId == null){
+
                 throw new UserAuthorizationException("Invalid Username or Password");
             }
             product.setOwner_user_id(userId);
             if (product == null || request == null) {
                 throw new InvalidInputException("Request Body Cannot be Empty");
+
             }
 
             if (product.getName()==null || product.getName().isEmpty()) {
@@ -56,6 +58,7 @@ public class ProductController {
                 throw new InvalidInputException("Product Description Cannot be Empty");
 
             }
+
             if (product.getSku()==null|| product.getSku().isEmpty()) {
                 throw new InvalidInputException("Product SKU Cannot be Empty");
 
@@ -84,6 +87,7 @@ public class ProductController {
 
         }
         catch(UserAuthorizationException e){
+
             ResponseObject response = new ResponseObject();
             response.setHttpStatusCode(HttpStatus.BAD_REQUEST);
             response.setResponseMessage(e.getMessage());
@@ -100,6 +104,7 @@ public class ProductController {
             response.setHttpStatusCode(HttpStatus.BAD_REQUEST);
             response.setResponseMessage(e.getMessage());
             return new ResponseEntity<ResponseObject>( response,HttpStatus.BAD_REQUEST);
+
         }
     }
 
@@ -108,7 +113,9 @@ public class ProductController {
     public ResponseEntity<?> updateUser(@PathVariable Integer productId , @RequestBody Product product, HttpServletRequest request){
         try{
             if(!(productService.isAuthorisedForPut(productId,request.getHeader("Authorization").split(" ")[1], product))){
+
                 throw new UserAuthorizationException("Invalid Username or Password");
+
             }
 
             if (product == null || request==null) {
@@ -120,10 +127,12 @@ public class ProductController {
             }
             if (product.getDescription()==null || product.getDescription().isEmpty()) {
                 throw new InvalidInputException("Product Description Cannot be Empty");
+
             }
             if (product.getSku()==null || product.getSku().isEmpty()) {
                 throw new InvalidInputException("Product SKU Cannot be Empty");
             }
+
             if(productService.ifProductSKUExists(product.getSku())) throw new UserExistException("User with SKU Exists");
             if (product.getManufacturer()==null || product.getManufacturer().isEmpty()) {
                 throw new InvalidInputException("Manufacturer Cannot be Null");
@@ -131,6 +140,7 @@ public class ProductController {
             try {
                 if ( product.getQuantity() < 1) {
                     throw new InvalidInputException("Invalid Product Quantity");
+
                 }
             }catch(Exception e){
                 throw new InvalidInputException("Invalid Product Quantity");
@@ -142,6 +152,7 @@ public class ProductController {
             if (product.getDate_added()!=null || product.getDate_last_updated()!=null ) {
                 throw new InvalidInputException("Any Date Cannot Be Passed");
             }
+
 
             ResponseObject response = new ResponseObject();
             response.setHttpStatusCode(HttpStatus.OK);
@@ -210,6 +221,25 @@ public class ProductController {
             response.setHttpStatusCode(HttpStatus.BAD_REQUEST);
             response.setResponseMessage(e.getMessage());
             return new ResponseEntity<ResponseObject>( response,HttpStatus.BAD_REQUEST);
+
+        }
+        catch(UserExistException e){
+            ResponseObject response = new ResponseObject();
+            response.setHttpStatusCode(HttpStatus.BAD_REQUEST);
+            response.setResponseMessage(e.getMessage());
+            return new ResponseEntity<ResponseObject>(response,HttpStatus.BAD_REQUEST);
+        }
+        catch(DataNotFoundExeception e){
+            ResponseObject response = new ResponseObject();
+            response.setHttpStatusCode(HttpStatus.NO_CONTENT);
+            response.setResponseMessage(e.getMessage());
+            return new ResponseEntity<ResponseObject>(response,HttpStatus.NO_CONTENT);
+        }
+        catch(Exception e) {
+            ResponseObject response = new ResponseObject();
+            response.setHttpStatusCode(HttpStatus.BAD_REQUEST);
+            response.setResponseMessage(e.getMessage());
+            return new ResponseEntity<ResponseObject>( response,HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -227,18 +257,20 @@ public class ProductController {
 
     }
 
-
     @RequestMapping(path = "/v1/product/{productId}", method = RequestMethod.DELETE)
     public ResponseEntity<?> deleteUser(@PathVariable Integer productId , HttpServletRequest request){
+
         productService.isAuthorisedForGet(productId,request.getHeader("Authorization").split(" ")[1]);
         int productCount = productService.findProductById(productId);
 
         if(productCount==1){
+
             String responseMessage = productService.deleteProduct(productId);
             ResponseObject response = new ResponseObject();
             response.setHttpStatusCode(HttpStatus.OK);
             response.setResponseMessage(responseMessage);
             return new ResponseEntity<ResponseObject>(response,HttpStatus.OK);
+
         }else {
 
             ResponseObject response = new ResponseObject();

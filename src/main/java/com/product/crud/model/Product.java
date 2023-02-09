@@ -26,7 +26,9 @@ public class Product {
     private String manufacturer;
     private LocalDateTime date_added;
     private LocalDateTime date_last_updated;
+
     private Integer quantity;
+
     private Long owner_user_id;
 
 

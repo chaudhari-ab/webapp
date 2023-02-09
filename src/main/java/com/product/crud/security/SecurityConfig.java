@@ -24,9 +24,11 @@ public class SecurityConfig {
 
         http.authorizeHttpRequests((authz) -> authz.requestMatchers(HttpMethod.POST, "/v1/user").permitAll()
                 .requestMatchers(new AntPathRequestMatcher("/healthz", "GET")).permitAll()
+
 //                .requestMatchers(new AntPathRequestMatcher("/v1/product", "POST")).permitAll()
                 .requestMatchers(new AntPathRequestMatcher("/v1/product/{productId}", "GET")).permitAll()
 //                .requestMatchers(new AntPathRequestMatcher("/v1/product/{productId}", "DELETE")).permitAll()
+
                 .anyRequest()
                 .authenticated());
         http.csrf((csrf) -> csrf.disable());
