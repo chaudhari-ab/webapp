@@ -116,6 +116,7 @@ public class ProductService {
         return true;
     }
 
+
     public Product getProductbyId(Integer productId){
         Product productFromDb = productRepo.getProductbyId(productId);
         return productFromDb;
@@ -152,4 +153,5 @@ public class ProductService {
             return "Product with the ID does not Exists";
         }
     }
+
 }

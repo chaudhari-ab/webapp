@@ -1,10 +1,12 @@
 package com.product.crud.Controller;
 
 import com.google.gson.Gson;
+
 import com.product.crud.Exception.DataNotFoundExeception;
 import com.product.crud.Exception.InvalidInputException;
 import com.product.crud.Exception.UserAuthorizationException;
 import com.product.crud.Exception.UserExistException;
+
 import com.product.crud.model.Product;
 import com.product.crud.model.ResponseObject;
 import com.product.crud.model.User;
@@ -37,10 +39,11 @@ public class ProductController {
     @ResponseBody
     public ResponseEntity<?> createProduct( @RequestBody Product product, HttpServletRequest request) {
         System.out.println("Inside /v1/product");
-
+//        HttpServletResponse response = new HttpServletResponseWrapper();
         try {
             Long userId = productService.authCredential(request.getHeader("Authorization").split(" ")[1]);
             if(userId == null){
+
                 throw new UserAuthorizationException("Invalid Username or Password");
             }
             product.setOwner_user_id(userId);
@@ -84,6 +87,7 @@ public class ProductController {
 
         }
         catch(UserAuthorizationException e){
+
             ResponseObject response = new ResponseObject();
             response.setHttpStatusCode(HttpStatus.BAD_REQUEST);
             response.setResponseMessage(e.getMessage());
@@ -100,6 +104,7 @@ public class ProductController {
             response.setHttpStatusCode(HttpStatus.BAD_REQUEST);
             response.setResponseMessage(e.getMessage());
             return new ResponseEntity<ResponseObject>( response,HttpStatus.BAD_REQUEST);
+
         }
     }
 
@@ -108,7 +113,9 @@ public class ProductController {
     public ResponseEntity<?> updateUser(@PathVariable Integer productId , @RequestBody Product product, HttpServletRequest request){
         try{
             if(!(productService.isAuthorisedForPut(productId,request.getHeader("Authorization").split(" ")[1], product))){
+
                 throw new UserAuthorizationException("Invalid Username or Password");
+
             }
 
             if (product == null || request==null) {
@@ -124,6 +131,7 @@ public class ProductController {
             if (product.getSku()==null || product.getSku().isEmpty()) {
                 throw new InvalidInputException("Product SKU Cannot be Empty");
             }
+
             if(productService.ifProductSKUExists(product.getSku())) throw new UserExistException("User with SKU Exists");
             if (product.getManufacturer()==null || product.getManufacturer().isEmpty()) {
                 throw new InvalidInputException("Manufacturer Cannot be Null");
@@ -131,6 +139,7 @@ public class ProductController {
             try {
                 if ( product.getQuantity() < 1) {
                     throw new InvalidInputException("Invalid Product Quantity");
+
                 }
             }catch(Exception e){
                 throw new InvalidInputException("Invalid Product Quantity");
@@ -229,16 +238,20 @@ public class ProductController {
 
 
     @RequestMapping(path = "/v1/product/{productId}", method = RequestMethod.DELETE)
+
     public ResponseEntity<?> deleteUser(@PathVariable Integer productId , HttpServletRequest request){
+
         productService.isAuthorisedForGet(productId,request.getHeader("Authorization").split(" ")[1]);
         int productCount = productService.findProductById(productId);
 
         if(productCount==1){
+
             String responseMessage = productService.deleteProduct(productId);
             ResponseObject response = new ResponseObject();
             response.setHttpStatusCode(HttpStatus.OK);
             response.setResponseMessage(responseMessage);
             return new ResponseEntity<ResponseObject>(response,HttpStatus.OK);
+
         }else {
 
             ResponseObject response = new ResponseObject();
