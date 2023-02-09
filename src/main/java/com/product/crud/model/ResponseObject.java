@@ -8,7 +8,7 @@ public class ResponseObject {
 
     private String responseMessage;
 
-    private Object object;
+
 
     public HttpStatusCode getHttpStatusCode() {
         return HttpStatusCode;
@@ -26,11 +26,5 @@ public class ResponseObject {
         this.responseMessage = responseMessage;
     }
 
-    public Object getObject() {
-        return object;
-    }
 
-    public void setObject(Object object) {
-        this.object = object;
-    }
 }

@@ -105,6 +105,7 @@ public class CrudRestController {
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Cannot Enter Account Updated");
 			}
 			service.isAuthorised(userId,request.getHeader("Authorization").split(" ")[1]);
+
 			service.updateUser(user,userId);
 			return ResponseEntity.status(HttpStatus.CREATED).body("User Updated");
 
