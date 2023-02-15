@@ -1,5 +1,6 @@
 package com.product.crud.services;
 
+import com.product.crud.Exception.UserAuthorizationException;
 import com.product.crud.model.Product;
 import com.product.crud.model.User;
 import com.product.crud.repo.ProductRepo;
@@ -33,6 +34,17 @@ public class ProductService {
 
     public boolean ifProductSKUExists(String sku){
        return productRepo.checkSKUExists(sku)!=0?true:false;
+    }
+    public boolean ifOtherProductWithSKUExists(String sku, Integer productId){
+        Product productBySku = productRepo.getProductbySku(sku);
+        System.out.println(productBySku);
+        if(productBySku==null){
+            return false;
+        }
+        if(productId==productBySku.getId()){
+            return false;
+        }
+        return true;
     }
 
     public String updateProduct(Integer id,Product product){
@@ -68,7 +80,7 @@ public class ProductService {
         return new BCryptPasswordEncoder();
     }
 
-    public boolean isAuthorisedForPut(int productId,String tokenEnc, Product productsRequest)  {
+    public boolean isAuthorisedForPut(int productId,String tokenEnc, Product productsRequest)  throws UserAuthorizationException {
         Product product1 = getUserDetailsAuth(productId);
         Long userId ;
         if(product1!=null) {
@@ -83,7 +95,7 @@ public class ProductService {
         String passWord = decodedStr.split(":")[1];
         System.out.println("Value of Token" + " "+ decodedStr);
         if(!(user.get().getUsername().equals(userName)) || !(PassEncoder().matches(passWord,user.get().getPassword()))){
-            return false;
+            throw new UserAuthorizationException("Forbidden");
         }
         return true;
     }
@@ -95,7 +107,7 @@ public class ProductService {
         }
         return null;
     }
-    public boolean isAuthorisedForGet(int productId, String tokenEnc) {
+    public boolean isAuthorisedForGet(int productId, String tokenEnc) throws UserAuthorizationException {
 
         Product product1 = getUserDetailsAuth(productId);
         Long userId ;
@@ -111,7 +123,7 @@ public class ProductService {
         String passWord = decodedStr.split(":")[1];
         System.out.println("Value of Token" + " "+ decodedStr);
         if(!(user.get().getUsername().equals(userName)) || !(PassEncoder().matches(passWord,user.get().getPassword()))){
-            return false;
+            throw new UserAuthorizationException("Forbidden");
         }
         return true;
     }
@@ -126,7 +138,7 @@ public class ProductService {
         Product productFromDb = productRepo.getProductbyId(productId);
         if(productFromDb!=null){
         if(product.getQuantity()!=null){
-            if(product.getQuantity()<1) return "Invalid Product Quantity";
+            if(product.getQuantity()< 0 || product.getQuantity() > 99) return "Invalid Product Quantity";
             productFromDb.setQuantity(product.getQuantity());
         }
         if(product.getName()!=null){
@@ -142,8 +154,8 @@ public class ProductService {
             productFromDb.setDescription(product.getDescription());
         }
         if(product.getSku()!=null){
-            if(ifProductSKUExists(product.getSku())){
-                return "Product with SKU Exists";
+            if(ifOtherProductWithSKUExists(product.getSku(),productId)){
+                return "Another Product with SKU Exists";
             }
             productFromDb.setSku(product.getSku());
         }

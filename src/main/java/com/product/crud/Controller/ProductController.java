@@ -39,8 +39,11 @@ public class ProductController {
     @ResponseBody
     public ResponseEntity<?> createProduct( @RequestBody Product product, HttpServletRequest request) {
         System.out.println("Inside /v1/product");
-//        HttpServletResponse response = new HttpServletResponseWrapper();
         try {
+            System.out.println(product.getOwner_user_id());
+            if (product.getOwner_user_id()!=null  ) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Owner_user_id Cannot be passed");
+            }
             Long userId = productService.authCredential(request.getHeader("Authorization").split(" ")[1]);
             if(userId == null){
 
@@ -70,7 +73,7 @@ public class ProductController {
                 throw new InvalidInputException("Manufacturer Cannot be Null");
             }
                 try {
-                    if ( product.getQuantity() < 1) {
+                    if ( product.getQuantity() < 0 || product.getQuantity() > 99) {
                         throw new InvalidInputException("Invalid Product Quantity");
                     }
                 }catch(Exception e){
@@ -83,6 +86,8 @@ public class ProductController {
             if (product.getDate_added()!=null || product.getDate_last_updated()!=null ) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Any Date Cannot be passed");
             }
+
+
             return new ResponseEntity<Product>( productService.addProduct(product),HttpStatus.CREATED);
 
         }
@@ -114,7 +119,7 @@ public class ProductController {
         try{
             if(!(productService.isAuthorisedForPut(productId,request.getHeader("Authorization").split(" ")[1], product))){
 
-                throw new UserAuthorizationException("Invalid Username or Password");
+                throw new InvalidInputException("Invalid Username or Password");
 
             }
 
@@ -132,12 +137,12 @@ public class ProductController {
                 throw new InvalidInputException("Product SKU Cannot be Empty");
             }
 
-            if(productService.ifProductSKUExists(product.getSku())) throw new UserExistException("User with SKU Exists");
+            if(productService.ifOtherProductWithSKUExists(product.getSku(),productId)) throw new UserExistException("User with SKU Exists");
             if (product.getManufacturer()==null || product.getManufacturer().isEmpty()) {
                 throw new InvalidInputException("Manufacturer Cannot be Null");
             }
             try {
-                if ( product.getQuantity() < 1) {
+                if ( product.getQuantity() < 0 || product.getQuantity() > 99) {
                     throw new InvalidInputException("Invalid Product Quantity");
 
                 }
@@ -155,18 +160,19 @@ public class ProductController {
             ResponseObject response = new ResponseObject();
             response.setHttpStatusCode(HttpStatus.OK);
             response.setResponseMessage(productService.updateProduct(productId,product));
-            return new ResponseEntity<ResponseObject>(response,HttpStatus.OK);
+            return new ResponseEntity<ResponseObject>(response,HttpStatus.NO_CONTENT);
 
         }catch(UserAuthorizationException e){
             ResponseObject response = new ResponseObject();
-            response.setHttpStatusCode(HttpStatus.UNAUTHORIZED);
+            response.setHttpStatusCode(HttpStatus.FORBIDDEN);
             response.setResponseMessage(e.getMessage());
-            return new ResponseEntity<ResponseObject>(response,HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<ResponseObject>(response,HttpStatus.FORBIDDEN);
         }
         catch(InvalidInputException e){
             ResponseObject response = new ResponseObject();
             response.setHttpStatusCode(HttpStatus.BAD_REQUEST);
             response.setResponseMessage(e.getMessage());
+            if(e.getMessage().matches("Invalid Username or Password")) return new ResponseEntity<ResponseObject>(response,HttpStatus.UNAUTHORIZED);
             return new ResponseEntity<ResponseObject>(response,HttpStatus.BAD_REQUEST);
         }
         catch(Exception e) {
@@ -181,26 +187,36 @@ public class ProductController {
     @RequestMapping(path = "/v1/product/{productId}", method = RequestMethod.PATCH,produces= MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> updateUserwithPatch(@PathVariable Integer productId , @RequestBody Product product, HttpServletRequest request){
         try{
+            Product fromDb = productService.getProductbyId(productId);
+            if(fromDb==null)
+                return new ResponseEntity<>("Not Found", HttpStatus.NOT_FOUND);
             if(!(productService.isAuthorisedForPut(productId,request.getHeader("Authorization").split(" ")[1], product))){
-                throw new UserAuthorizationException("Invalid Username or Password");
+                throw new InvalidInputException("Invalid Username or Password");
             }
 
             String responseMessage = productService.updateProductwithPatch(productId,product);
             if(responseMessage.contains("Invalid")) throw new InvalidInputException(responseMessage);
-            else if (responseMessage.equals("Product with SKU Exists")) throw new UserExistException(responseMessage);
+            else if (responseMessage.equals("Another Product with SKU Exists")) throw new UserExistException(responseMessage);
             else if (responseMessage.equals("Product with the ID does not Exists")) throw new DataNotFoundExeception(responseMessage);
 
             ResponseObject response = new ResponseObject();
             response.setHttpStatusCode(HttpStatus.OK);
             response.setResponseMessage(responseMessage);
-            return new ResponseEntity<ResponseObject>(response,HttpStatus.OK);
+            return new ResponseEntity<ResponseObject>(response,HttpStatus.NO_CONTENT);
 
         }
         catch(UserAuthorizationException e){
             ResponseObject response = new ResponseObject();
-            response.setHttpStatusCode(HttpStatus.UNAUTHORIZED);
+            response.setHttpStatusCode(HttpStatus.FORBIDDEN);
             response.setResponseMessage(e.getMessage());
-            return new ResponseEntity<ResponseObject>(response,HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<ResponseObject>(response,HttpStatus.FORBIDDEN);
+        }
+        catch(InvalidInputException e){
+            ResponseObject response = new ResponseObject();
+            response.setHttpStatusCode(HttpStatus.BAD_REQUEST);
+            response.setResponseMessage(e.getMessage());
+            if(e.getMessage().matches("Invalid Username or Password")) return new ResponseEntity<ResponseObject>(response,HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<ResponseObject>(response,HttpStatus.BAD_REQUEST);
         }
         catch(UserExistException e){
             ResponseObject response = new ResponseObject();
@@ -210,9 +226,9 @@ public class ProductController {
         }
         catch(DataNotFoundExeception e){
             ResponseObject response = new ResponseObject();
-            response.setHttpStatusCode(HttpStatus.NO_CONTENT);
+            response.setHttpStatusCode(HttpStatus.NOT_FOUND);
             response.setResponseMessage(e.getMessage());
-            return new ResponseEntity<ResponseObject>(response,HttpStatus.NO_CONTENT);
+            return new ResponseEntity<ResponseObject>(response,HttpStatus.NOT_FOUND);
         }
         catch(Exception e) {
             ResponseObject response = new ResponseObject();
@@ -226,7 +242,7 @@ public class ProductController {
     public ResponseEntity<?> getProduct(@PathVariable Integer productId) {
         Product productFromDb = productService.getProductbyId(productId);
         if(productFromDb!=null){
-            return new ResponseEntity<Product>( productFromDb,HttpStatus.CREATED);
+            return new ResponseEntity<Product>( productFromDb,HttpStatus.OK);
         }else{
             ResponseObject response = new ResponseObject();
             response.setHttpStatusCode(HttpStatus.NOT_FOUND);
@@ -239,25 +255,34 @@ public class ProductController {
 
     @RequestMapping(path = "/v1/product/{productId}", method = RequestMethod.DELETE)
 
-    public ResponseEntity<?> deleteUser(@PathVariable Integer productId , HttpServletRequest request){
+    public ResponseEntity<?> deleteUser(@PathVariable Integer productId , HttpServletRequest request) {
 
-        productService.isAuthorisedForGet(productId,request.getHeader("Authorization").split(" ")[1]);
-        int productCount = productService.findProductById(productId);
+        try {
+            Product fromDb = productService.getProductbyId(productId);
+            if(fromDb==null)
+                return new ResponseEntity<>("Not Found", HttpStatus.NOT_FOUND);
 
-        if(productCount==1){
+            if (!(productService.isAuthorisedForGet(productId, request.getHeader("Authorization").split(" ")[1]))) {
+                throw new InvalidInputException("Invalid Username or Password");
+            }
 
-            String responseMessage = productService.deleteProduct(productId);
+
+                String responseMessage = productService.deleteProduct(productId);
+
+                return new ResponseEntity<>("Deleted", HttpStatus.NO_CONTENT);
+
+        }catch(UserAuthorizationException e){
             ResponseObject response = new ResponseObject();
-            response.setHttpStatusCode(HttpStatus.OK);
-            response.setResponseMessage(responseMessage);
-            return new ResponseEntity<ResponseObject>(response,HttpStatus.OK);
-
-        }else {
-
-            ResponseObject response = new ResponseObject();
-            response.setHttpStatusCode(HttpStatus.OK);
-            response.setResponseMessage("Product with Id Does Not Exist");
-            return new ResponseEntity<ResponseObject>(response,HttpStatus.OK);
+            response.setHttpStatusCode(HttpStatus.FORBIDDEN);
+            response.setResponseMessage(e.getMessage());
+            return new ResponseEntity<ResponseObject>(response,HttpStatus.FORBIDDEN);
         }
+    catch(Exception e){
+        ResponseObject response = new ResponseObject();
+        response.setHttpStatusCode(HttpStatus.BAD_REQUEST);
+        response.setResponseMessage(e.getMessage());
+        if(e.getMessage().matches("Invalid Username or Password")) return new ResponseEntity<ResponseObject>(response,HttpStatus.UNAUTHORIZED);
+        return new ResponseEntity<ResponseObject>(response,HttpStatus.BAD_REQUEST);
+    }
     }
 }
