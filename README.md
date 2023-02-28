@@ -6,7 +6,7 @@ Prerequisites<br/> JAVA: jdk 17, SpringBoot version 3.x.x<br/> mysql database<br
 
 Build Instructions<br/>
 
-Clone this repository into the local system -
+Clone this repository into the local system - 
 
 Open the CLI
 mvn clean install
