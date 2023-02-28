@@ -26,8 +26,8 @@ public class SecurityConfig {
                 .requestMatchers(new AntPathRequestMatcher("/healthz", "GET")).permitAll()
                 .requestMatchers(new AntPathRequestMatcher("/v1/product/image", "POST")).permitAll()
 
-                .requestMatchers(new AntPathRequestMatcher("/v1/product/{productId}", "GET")).permitAll()
-                .requestMatchers(new AntPathRequestMatcher("/v1/product/delete/{imageName}", "DELETE")).permitAll()
+//                .requestMatchers(new AntPathRequestMatcher("/v1/product/{productId}", "GET")).permitAll()
+//                .requestMatchers(new AntPathRequestMatcher("/v1/product/delete/{imageName}", "DELETE")).permitAll()
                 .requestMatchers(new AntPathRequestMatcher("/v1/product/download/{imageName}", "GET")).permitAll()
 
                 .anyRequest()
