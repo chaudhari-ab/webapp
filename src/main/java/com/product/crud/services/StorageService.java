@@ -69,9 +69,8 @@ public class StorageService {
     public String deleteImage(Integer imageid){
         String fileName;
         Image image = imageRepo.getImagebyId(imageid);
+        if(image==null) return "Image Not Found";
         fileName=image.getFile_name();
-        System.out.println(fileName);
-        System.out.println(image.getS3_bucket_path());
 
         s3client.deleteObject(bucketName,fileName);
         imageRepo.deleteById(imageid);
@@ -95,6 +94,10 @@ public class StorageService {
 
     public List<Image> getAllImages(Integer product_id){
         List<Image> list1= imageRepo.getAllImages(product_id);
-        return list1;
+        if(list1!=null && !list1.isEmpty()) {
+            return list1;
+        }else {
+            return null;
+        }
     }
 }

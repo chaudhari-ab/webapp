@@ -35,6 +35,7 @@ public class StorageController {
             }
             return new ResponseEntity<Image>( storageService.uploadImage(file,product_id),HttpStatus.CREATED);
 
+
         }catch(InvalidInputException e){
             ResponseObject response = new ResponseObject();
             response.setHttpStatusCode(HttpStatus.BAD_REQUEST);
@@ -69,7 +70,13 @@ public class StorageController {
             if (!(productService.isAuthorisedForPut(product_id, request.getHeader("Authorization").split(" ")[1], null))) {
                 throw new InvalidInputException("Invalid Username or Password");
             }
-            return new ResponseEntity<Image>( storageService.getImage(image_id),HttpStatus.OK);
+            Image image = storageService.getImage(image_id);
+            if(image!=null){
+                return new ResponseEntity<Image>( image,HttpStatus.OK);
+            }else{
+                return new ResponseEntity<>("Not Found", HttpStatus.NOT_FOUND);
+            }
+
         }catch(InvalidInputException e){
             ResponseObject response = new ResponseObject();
             response.setHttpStatusCode(HttpStatus.BAD_REQUEST);
@@ -90,7 +97,13 @@ public class StorageController {
             if (!(productService.isAuthorisedForPut(product_id, request.getHeader("Authorization").split(" ")[1], null))) {
                 throw new InvalidInputException("Invalid Username or Password");
             }
-            return new ResponseEntity<List<Image>>( storageService.getAllImages(product_id),HttpStatus.OK);
+            List<Image> imageList = storageService.getAllImages(product_id);
+            if(imageList!=null && !imageList.isEmpty()){
+                return new ResponseEntity<List<Image>>( imageList,HttpStatus.OK);
+            }else{
+                return new ResponseEntity<>("Not Found", HttpStatus.NOT_FOUND);
+            }
+
         }catch(InvalidInputException e){
             ResponseObject response = new ResponseObject();
             response.setHttpStatusCode(HttpStatus.BAD_REQUEST);
@@ -115,8 +128,9 @@ public class StorageController {
             if (!(productService.isAuthorisedForPut(product_id, request.getHeader("Authorization").split(" ")[1], null))) {
                 throw new InvalidInputException("Invalid Username or Password");
             }
-            storageService.deleteImage(image_id);
-            return new ResponseEntity<String>( "Image Deleted Successfully",HttpStatus.CREATED);
+            String deleteResponse=storageService.deleteImage(image_id);
+            if(deleteResponse.equals("Image Not Found"))  return new ResponseEntity<>("Not Found", HttpStatus.NOT_FOUND);
+            return new ResponseEntity<String>( "Image Deleted Successfully",HttpStatus.NO_CONTENT);
         }catch(InvalidInputException e){
             ResponseObject response = new ResponseObject();
             response.setHttpStatusCode(HttpStatus.BAD_REQUEST);
