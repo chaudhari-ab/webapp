@@ -27,7 +27,7 @@ public class StorageController {
 
     @RequestMapping(path = "/v1/product/{product_id}/image", method = RequestMethod.POST)
     @ResponseBody
-    public ResponseEntity<?> uploadFile( Integer product_id,@RequestParam(value="file")MultipartFile file, HttpServletRequest request){
+    public ResponseEntity<?> uploadFile( @PathVariable("product_id") Integer product_id,@RequestParam(value="file")MultipartFile file, HttpServletRequest request){
 
         try {
             if (!(productService.isAuthorisedForPut(product_id, request.getHeader("Authorization").split(" ")[1], null))) {

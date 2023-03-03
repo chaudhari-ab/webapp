@@ -1,5 +1,6 @@
 package com.product.crud.services;
 
+//import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
@@ -17,6 +18,7 @@ import java.io.FileOutputStream;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class StorageService {
@@ -32,14 +34,18 @@ public class StorageService {
     ImageRepo imageRepo;
 
     public Image uploadImage(MultipartFile file,Integer product_id){
-        String fileName = System.currentTimeMillis()+"_"+file.getOriginalFilename();
+        String path = String.format("%s/%s/", bucketName, product_id);
+        String fileName = String.format("%s/%s",String.valueOf(UUID.randomUUID()), file.getOriginalFilename());
+
+        //String fileName = System.currentTimeMillis()+"_"+file.getOriginalFilename();
         File file2put = mpf2f(file);
         String bucketPath=null;
-        s3client.putObject(new PutObjectRequest(bucketName,fileName,file2put));
+        s3client.putObject(new PutObjectRequest(bucketName,path,file2put));
+        bucketPath=String.valueOf(s3client.getUrl(bucketName,fileName));
         file2put.delete();
         
         return saveImageinDB(product_id,fileName,bucketPath);
-//        return "ImageUploaded and Saved in DB";
+
     }
 
     private Image saveImageinDB(Integer product_id, String fileName, String bucketPath) {
@@ -48,7 +54,7 @@ public class StorageService {
         imagetoSave.setProduct_id(product_id);
         imagetoSave.setFile_name(fileName);
         imagetoSave.setDate_created(LocalDate.now());
-        imagetoSave.setS3_bucket_path("My Bucket");
+        imagetoSave.setS3_bucket_path(bucketPath);
 
         return imageRepo.save(imagetoSave);
 
