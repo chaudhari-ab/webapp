@@ -65,7 +65,7 @@ public class StorageController {
     }
 
     @RequestMapping(path = "/v1/product/{product_id}/image/{image_id}", method = RequestMethod.GET)
-    public ResponseEntity<?> getImageDetails(@PathVariable Integer product_id,Integer image_id,HttpServletRequest request){
+    public ResponseEntity<?> getImageDetails(@PathVariable Integer product_id,@PathVariable Integer image_id,HttpServletRequest request){
         try {
             if (!(productService.isAuthorisedForPut(product_id, request.getHeader("Authorization").split(" ")[1], null))) {
                 throw new InvalidInputException("Invalid Username or Password");
