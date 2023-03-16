@@ -123,7 +123,7 @@ public class StorageController {
 
     @RequestMapping(path = "/v1/product/{product_id}/image/{image_id}", method = RequestMethod.DELETE)
     @ResponseBody
-    public ResponseEntity<?> deleteImage(@PathVariable Integer image_id,Integer product_id,HttpServletRequest request){
+    public ResponseEntity<?> deleteImage(@PathVariable Integer image_id,@PathVariable Integer product_id,HttpServletRequest request){
         try {
             if (!(productService.isAuthorisedForPut(product_id, request.getHeader("Authorization").split(" ")[1], null))) {
                 throw new InvalidInputException("Invalid Username or Password");
