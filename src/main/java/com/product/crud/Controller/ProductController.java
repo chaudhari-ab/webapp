@@ -115,7 +115,7 @@ public class ProductController {
 
 
     @RequestMapping(path = "/v1/product/{productId}", method = RequestMethod.PUT,produces= MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> updateUser(@PathVariable Integer productId , @RequestBody Product product, HttpServletRequest request){
+    public ResponseEntity<?> updateProduct(@PathVariable Integer productId , @RequestBody Product product, HttpServletRequest request){
         try{
             if(!(productService.isAuthorisedForPut(productId,request.getHeader("Authorization").split(" ")[1], product))){
 
@@ -185,7 +185,7 @@ public class ProductController {
     }
 
     @RequestMapping(path = "/v1/product/{productId}", method = RequestMethod.PATCH,produces= MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> updateUserwithPatch(@PathVariable Integer productId , @RequestBody Product product, HttpServletRequest request){
+    public ResponseEntity<?> updateProductwithPatch(@PathVariable Integer productId , @RequestBody Product product, HttpServletRequest request){
         try{
             Product fromDb = productService.getProductbyId(productId);
             if(fromDb==null)
@@ -255,7 +255,7 @@ public class ProductController {
 
     @RequestMapping(path = "/v1/product/{productId}", method = RequestMethod.DELETE)
 
-    public ResponseEntity<?> deleteUser(@PathVariable Integer productId , HttpServletRequest request) {
+    public ResponseEntity<?> deleteProduct(@PathVariable Integer productId , HttpServletRequest request) {
 
         try {
             Product fromDb = productService.getProductbyId(productId);
