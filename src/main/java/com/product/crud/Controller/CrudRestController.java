@@ -88,6 +88,8 @@ public class CrudRestController {
 
 	@RequestMapping(path = "/v1/user/{userId}", method = RequestMethod.PUT)
 	public ResponseEntity<?> updateUser(@PathVariable Long userId ,  @RequestBody User user,BindingResult errors, HttpServletRequest request ) {
+		log.info("Inside User Controller. Updating User");
+		statsDClient.incrementCounter("endpoint.updateUser.http.put");
 		RegistrationStatus registrationStatus;
 		if(user==null) return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Request Body Cannot be Empty");
 		try {
@@ -156,5 +158,6 @@ public class CrudRestController {
 	@RequestMapping(path = "/healthz", method = RequestMethod.GET)
 	public void healthZ(HttpServletRequest request) {
 		log.info("Healthz Good!!");
+		statsDClient.incrementCounter("endpoint.healthZ.http.get");
 	}
 }
