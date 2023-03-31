@@ -159,5 +159,6 @@ public class CrudRestController {
 	public void healthZ(HttpServletRequest request) {
 		log.info("Healthz Good!!");
 		statsDClient.incrementCounter("endpoint.healthZ.http.get");
+
 	}
 }

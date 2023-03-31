@@ -83,6 +83,7 @@ public class StorageController {
     public ResponseEntity<?> getImageDetails(@PathVariable Integer product_id,@PathVariable Integer image_id,HttpServletRequest request){
         log.info("Inside Storage Controller. Getting Image");
         statsDClient.incrementCounter("endpoint.getImageDetails.http.get");
+
         try {
             if(productService.findProductById(product_id)<1){
                 throw new InvalidInputException("Invalid Product ID");
@@ -121,6 +122,7 @@ public class StorageController {
     public ResponseEntity<?> getImageList(@PathVariable Integer product_id,HttpServletRequest request){
         log.info("Inside Storage Controller. Getting Image");
         statsDClient.incrementCounter("endpoint.getImageList.http.get");
+
         try {
             if (!(productService.isAuthorisedForPut(product_id, request.getHeader("Authorization").split(" ")[1], null))) {
                 throw new InvalidInputException("Invalid Username or Password");
