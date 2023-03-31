@@ -2,10 +2,12 @@ package com.product.crud.services;
 
 //import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import com.amazonaws.util.IOUtils;
+import com.product.crud.Exception.DataNotFoundExeception;
 import com.product.crud.model.Image;
 import com.product.crud.repo.ImageRepo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,17 +35,39 @@ public class StorageService {
     @Autowired
     ImageRepo imageRepo;
 
-    public Image uploadImage(MultipartFile file,Integer product_id){
-        String path = String.format("%s/%s/", bucketName, product_id);
-        String fileName = String.format("%s/%s",String.valueOf(UUID.randomUUID()), file.getOriginalFilename());
-
-        //String fileName = System.currentTimeMillis()+"_"+file.getOriginalFilename();
-        File file2put = mpf2f(file);
+    public Image uploadImage(MultipartFile file,Integer product_id) throws Exception{
+//        String path = String.format("%s/%s/", bucketName, product_id);
+//        String fileName = String.format("%s/%s",String.valueOf(UUID.randomUUID()), file.getOriginalFilename());
+//
+//        //String fileName = System.currentTimeMillis()+"_"+file.getOriginalFilename();
+//        File file2put = mpf2f(file);
         String bucketPath=null;
-        s3client.putObject(new PutObjectRequest(bucketName,path,file2put));
+//        s3client.putObject(new PutObjectRequest(bucketName,path,file2put));
+//        bucketPath=String.valueOf(s3client.getUrl(bucketName,fileName));
+//        file2put.delete();
+
+        if (file.isEmpty()) {
+            throw new Exception("Cannot upload empty file");
+        }
+
+        ObjectMetadata objectMetadata = new ObjectMetadata();
+        objectMetadata.setContentLength(file.getSize());
+        objectMetadata.setContentType(file.getContentType());
+        objectMetadata.setCacheControl("public, max-age=31536000");
+        String path = String.format("%s/%s", bucketName,  product_id);
+        String fileName = String.format("%s/%s",String.valueOf(UUID.randomUUID()), file.getOriginalFilename());
+        System.out.println(path+" "+fileName);
+
+        try {
+            System.out.println("create Image "+59);
+            s3client.putObject(path, fileName,  file.getInputStream(), objectMetadata);
+            System.out.println("create Image "+60);
+        } catch (Exception e) {
+
+            throw new IllegalStateException("Failed to upload file", e);
+        }
+
         bucketPath=String.valueOf(s3client.getUrl(bucketName,fileName));
-        file2put.delete();
-        
         return saveImageinDB(product_id,fileName,bucketPath);
 
     }
@@ -105,5 +129,15 @@ public class StorageService {
         }else {
             return null;
         }
+    }
+
+    public boolean isAuthorisedWithProduct(Integer product_id,Integer image_id) {
+        Optional<Image> image = imageRepo.findById(image_id);
+        if(image.isPresent()){
+            if(image.get().getProduct_id()==product_id)
+                return true;
+            return false;
+        }
+        return false;
     }
 }

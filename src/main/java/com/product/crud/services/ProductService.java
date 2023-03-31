@@ -1,10 +1,15 @@
 package com.product.crud.services;
 
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.ListObjectsV2Request;
+import com.amazonaws.services.s3.model.ListObjectsV2Result;
+import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.product.crud.Exception.UserAuthorizationException;
 import com.product.crud.model.Product;
 import com.product.crud.model.User;
 import com.product.crud.repo.ProductRepo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.Base64;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -22,6 +28,12 @@ public class ProductService {
     ProductRepo productRepo;
     @Autowired
     CrudService service;
+
+    @Value("${aws.s3.bucket.name}")
+    private String bucketName;
+
+    @Autowired
+    private AmazonS3 s3client;
 
     public Product addProduct(Product product){
 
@@ -128,6 +140,13 @@ public class ProductService {
         return true;
     }
 
+    public String getUserIdFromToken(String tokenEnc){
+        byte[] token = Base64.getDecoder().decode(tokenEnc);
+        String decodedStr = new String(token, StandardCharsets.UTF_8);
+        String userName = decodedStr.split(":")[0];
+        return userName;
+    }
+
 
     public Product getProductbyId(Integer productId){
         Product productFromDb = productRepo.getProductbyId(productId);
@@ -164,6 +183,22 @@ public class ProductService {
         }else{
             return "Product with the ID does not Exists";
         }
+    }
+
+    public void deleteImageByProductId(Integer productId)  throws Exception {
+        // TODO Auto-generated method stub
+        String path = String.format("%s",  productId);
+        String folderName = path;
+        System.out.println(path);
+        ListObjectsV2Request listObjectsRequest = new ListObjectsV2Request().withBucketName(bucketName).withPrefix(folderName);
+        ListObjectsV2Result objects = s3client.listObjectsV2(listObjectsRequest);
+        List<S3ObjectSummary> summaries = objects.getObjectSummaries();
+        System.out.println(objects+" "+summaries);
+        for (S3ObjectSummary summary : summaries) {
+            System.out.println(summary.getKey());
+            s3client.deleteObject(bucketName, summary.getKey());
+        }
+        s3client.deleteObject(bucketName, folderName);
     }
 
 }

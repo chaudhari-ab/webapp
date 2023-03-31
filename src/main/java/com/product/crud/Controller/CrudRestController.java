@@ -8,7 +8,10 @@ import com.product.crud.Validation.UserValidator;
 import com.product.crud.errors.RegistrationStatus;
 import com.product.crud.model.Product;
 import com.product.crud.model.User;
+import com.timgroup.statsd.StatsDClient;
 import jakarta.servlet.http.HttpServletRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,9 +39,14 @@ public class CrudRestController {
 		binder.setValidator(userValidator);
 	}
 
+	@Autowired
+ 	private StatsDClient statsDClient;
+	Logger log = LoggerFactory.getLogger(CrudRestController.class);
+
 	@RequestMapping(path = "/v1/user", method = RequestMethod.POST)
 	public ResponseEntity<?> createUser( @RequestBody User user, HttpServletRequest request) {
-
+		log.info("Inside User Controller. Creating User");
+		statsDClient.incrementCounter("endpoint.createUser.http.post");
 		User fromDBuser;
 		try {
 			if (user == null || request==null) {
@@ -73,7 +81,7 @@ public class CrudRestController {
 			}
 
 		}catch(Exception e){
-			System.out.println(e.getMessage());
+			log.info(e.getMessage());
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
 		}
 	}
@@ -123,6 +131,8 @@ public class CrudRestController {
 
 	@RequestMapping(path = "/v1/user/{userId}", method = RequestMethod.GET)
 	public ResponseEntity<?> fetchProductByID(@PathVariable Long userId, HttpServletRequest request) {
+		log.info("Inside User Controller. Getting User");
+		statsDClient.incrementCounter("endpoint.fetchProductByID.http.get");
 		try {
 			if(userId.toString().isBlank()||userId.toString().isEmpty()) {
 				throw new InvalidInputException("Enter Valid User Id");
@@ -145,5 +155,6 @@ public class CrudRestController {
 
 	@RequestMapping(path = "/healthz", method = RequestMethod.GET)
 	public void healthZ(HttpServletRequest request) {
+		log.info("Healthz Good!!");
 	}
 }
