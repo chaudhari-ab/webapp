@@ -12,9 +12,12 @@ import com.product.crud.model.ResponseObject;
 import com.product.crud.model.User;
 import com.product.crud.services.CrudService;
 import com.product.crud.services.ProductService;
+import com.timgroup.statsd.StatsDClient;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpServletResponseWrapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -33,12 +36,16 @@ public class ProductController {
     @Autowired
     private ProductService productService;
 
+    @Autowired
+    private StatsDClient statsDClient;
+    Logger log = LoggerFactory.getLogger(ProductController.class);
     ResponseObject responseObject;
     Map<String,String> responseHashmap;
     @RequestMapping(path = "/v1/product", method = RequestMethod.POST,produces="application/json")
     @ResponseBody
     public ResponseEntity<?> createProduct( @RequestBody Product product, HttpServletRequest request) {
-        System.out.println("Inside /v1/product");
+        log.info("Inside Product Controller. Creating Product");
+        statsDClient.incrementCounter("endpoint.createProduct.http.post");
         try {
             System.out.println(product.getOwner_user_id());
             if (product.getOwner_user_id()!=null  ) {
@@ -116,6 +123,8 @@ public class ProductController {
 
     @RequestMapping(path = "/v1/product/{productId}", method = RequestMethod.PUT,produces= MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> updateProduct(@PathVariable Integer productId , @RequestBody Product product, HttpServletRequest request){
+        log.info("Inside Product Controller. Updating Product");
+        statsDClient.incrementCounter("endpoint.updateProduct.http.put");
         try{
             if(!(productService.isAuthorisedForPut(productId,request.getHeader("Authorization").split(" ")[1], product))){
 
@@ -186,6 +195,8 @@ public class ProductController {
 
     @RequestMapping(path = "/v1/product/{productId}", method = RequestMethod.PATCH,produces= MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> updateProductwithPatch(@PathVariable Integer productId , @RequestBody Product product, HttpServletRequest request){
+        log.info("Inside Product Controller. Updating Product");
+        statsDClient.incrementCounter("endpoint.updateProductwithPatch.http.patch");
         try{
             Product fromDb = productService.getProductbyId(productId);
             if(fromDb==null)
@@ -240,6 +251,8 @@ public class ProductController {
 
     @RequestMapping(path = "/v1/product/{productId}", method = RequestMethod.GET)
     public ResponseEntity<?> getProduct(@PathVariable Integer productId) {
+        log.info("Inside Product Controller. Getting Product");
+        statsDClient.incrementCounter("endpoint.getProduct.http.get");
         Product productFromDb = productService.getProductbyId(productId);
         if(productFromDb!=null){
             return new ResponseEntity<Product>( productFromDb,HttpStatus.OK);
@@ -256,7 +269,8 @@ public class ProductController {
     @RequestMapping(path = "/v1/product/{productId}", method = RequestMethod.DELETE)
 
     public ResponseEntity<?> deleteProduct(@PathVariable Integer productId , HttpServletRequest request) {
-
+        log.info("Inside Product Controller. Deleting Product");
+        statsDClient.incrementCounter("endpoint.deleteProduct.http.delete");
         try {
             Product fromDb = productService.getProductbyId(productId);
             if(fromDb==null)
@@ -266,10 +280,11 @@ public class ProductController {
                 throw new InvalidInputException("Invalid Username or Password");
             }
 
+            String userName = productService.getUserIdFromToken(request.getHeader("Authorization").split(" ")[1]);
+            productService.deleteImageByProductId(productId);
+            String responseMessage = productService.deleteProduct(productId);
 
-                String responseMessage = productService.deleteProduct(productId);
-
-                return new ResponseEntity<>("Deleted", HttpStatus.NO_CONTENT);
+            return new ResponseEntity<>("Deleted", HttpStatus.NO_CONTENT);
 
         }catch(UserAuthorizationException e){
             ResponseObject response = new ResponseObject();
