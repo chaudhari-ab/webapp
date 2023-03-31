@@ -82,7 +82,8 @@ public class StorageController {
     @RequestMapping(path = "/v1/product/{product_id}/image/{image_id}", method = RequestMethod.GET)
     public ResponseEntity<?> getImageDetails(@PathVariable Integer product_id,@PathVariable Integer image_id,HttpServletRequest request){
         log.info("Inside Storage Controller. Getting Image");
-        statsDClient.incrementCounter("endpoint.downloadImage.http.get");
+        statsDClient.incrementCounter("endpoint.getImageDetails.http.get");
+
         try {
             if(productService.findProductById(product_id)<1){
                 throw new InvalidInputException("Invalid Product ID");
@@ -120,7 +121,8 @@ public class StorageController {
     @RequestMapping(path = "/v1/product/{product_id}/image", method = RequestMethod.GET)
     public ResponseEntity<?> getImageList(@PathVariable Integer product_id,HttpServletRequest request){
         log.info("Inside Storage Controller. Getting Image");
-        statsDClient.incrementCounter("endpoint.downloadImage.http.get");
+        statsDClient.incrementCounter("endpoint.getImageList.http.get");
+
         try {
             if (!(productService.isAuthorisedForPut(product_id, request.getHeader("Authorization").split(" ")[1], null))) {
                 throw new InvalidInputException("Invalid Username or Password");
@@ -153,7 +155,7 @@ public class StorageController {
     @ResponseBody
     public ResponseEntity<?> deleteImage(@PathVariable Integer image_id,@PathVariable Integer product_id,HttpServletRequest request){
         log.info("Inside Storage Controller. Getting Image");
-        statsDClient.incrementCounter("endpoint.downloadImage.http.get");
+        statsDClient.incrementCounter("endpoint.deleteImage.http.delete");
         try {
             if(productService.findProductById(product_id)<1){
                 throw new InvalidInputException("Invalid Product ID");
