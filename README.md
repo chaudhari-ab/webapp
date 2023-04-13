@@ -23,3 +23,6 @@ NEU ID - 002928364
 
 Email Address - chaudhari.ab@northeastern.edu  
 
+**** command to import the certificate ****
+
+aws acm import-certificate --certificate fileb://demo_abhishekchaudhari_me.crt --certificate-chain fileb://demo_abhishekchaudhari_me.ca-bundle --private-key fileb://private.txt --profile demo
