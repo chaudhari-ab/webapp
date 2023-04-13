@@ -24,6 +24,7 @@ public class SecurityConfig {
 
         http.authorizeHttpRequests((authz) -> authz.requestMatchers(HttpMethod.POST, "/v1/user").permitAll()
                 .requestMatchers(new AntPathRequestMatcher("/healthz", "GET")).permitAll()
+                .requestMatchers(new AntPathRequestMatcher("/health", "GET")).permitAll()
                 .requestMatchers(new AntPathRequestMatcher("/v1/product/image", "POST")).permitAll()
 
 //                .requestMatchers(new AntPathRequestMatcher("/v1/product/{productId}", "GET")).permitAll()
