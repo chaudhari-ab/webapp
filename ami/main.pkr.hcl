@@ -86,7 +86,12 @@ build {
     source      = "webservice.service"
     destination = "/tmp/"
   }
+   
 
+  post-processor "manifest"{
+   output="manifest.json"
+   strip_path=true
+  }
 
 
 }
