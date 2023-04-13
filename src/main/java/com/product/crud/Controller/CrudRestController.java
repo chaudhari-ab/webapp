@@ -161,4 +161,11 @@ public class CrudRestController {
 		statsDClient.incrementCounter("endpoint.healthZ.http.get");
 
 	}
+	
+	@RequestMapping(path = "/health", method = RequestMethod.GET)
+	public void health(HttpServletRequest request) {
+		log.info("Health Check, not HealthZ, Good!!");
+		statsDClient.incrementCounter("endpoint.health.http.get");
+
+	}
 }
