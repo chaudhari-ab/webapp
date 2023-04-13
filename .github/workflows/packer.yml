@@ -36,7 +36,9 @@ jobs:
           aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws_profile: ${{ secrets.AWS_PROFILE}}
-       - name: Set AWS Demo credentials
+
+      - name: Set AWS Demo credentials
+
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_DEMO }}
